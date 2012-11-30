@@ -1,0 +1,25 @@
+{
+"text": ".",
+"children":
+        [{
+            "text":"Asignacion de Jobcards",
+            "id":"jobcard_assignment",
+            "access": "7,8",
+            "leaf":true
+        },{
+            "text":"Seguimiento",
+            "id":"jobcard_tracking",
+            "access": "7,8",
+            "leaf":true
+        },{
+            "text":"Gestion de Vehiculos",
+            "id":"vehicleMgr",
+            "access": "7,8",
+            "leaf":true
+        },{
+            "text":"Gestion de Jobcards",
+            "id":"jobcardMgr",
+            "access": "7,8,12",
+            "leaf":true
+        }]
+}
