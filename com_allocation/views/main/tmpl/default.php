@@ -10,6 +10,9 @@ defined('_JEXEC') or die;
 
 
 <script type="text/javascript" src="<?php echo JURI::root() . 'components/com_allocation/assets/extjs/ext-all.js' ?>"></script>
+
+<script type="text/javascript" src="<?php echo JURI::root() . 'components/com_allocation/views/main/tmpl/api.php'?>"></script>
+
 <script type="text/javascript" src="<?php echo JURI::root() . 'components/com_allocation/assets/allocation/app/app.js'?>"></script>
 
     <div id="extjsContainer" style="min-height: 700px;">

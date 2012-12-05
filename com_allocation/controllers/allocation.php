@@ -1,14 +1,119 @@
-<?php  
-defined('_JEXEC') or die('Restricted access');  
-   
-jimport('joomla.application.component.controller');  
+<?php
+defined('_JEXEC') or die('Restricted access');
+
+jimport('joomla.application.component.controller');
 require_once ('components/com_allocation/models/databaseMgr.php');
-   
-class Controllerallocation extends JController {  
-    function display() {  
-        JRequest::setVar('view', 'principal'); 
-        parent::display();  
+require_once ('components/com_allocation/models/bogusAction.php');
+require ('components/com_allocation/models/directConfig.php');
+
+class allocationController extends JController {
+    function display() {
+        JRequest::setVar('view', 'main');
+        parent::display();
     }
+
+    function directRouter(){
+        $isForm = false;
+        $isUpload = false;
+        if (!isset($HTTP_RAW_POST_DATA)) {
+            $HTTP_RAW_POST_DATA =file_get_contents( 'php://input' );
+        }
+        if (isset($HTTP_RAW_POST_DATA)) {
+            header('Content-Type: text/javascript');
+            $data = json_decode($HTTP_RAW_POST_DATA);
+        } else if (isset($_POST['extAction'])) { // form post
+            $isForm = true;
+            $isUpload = $_POST['extUpload'] == 'true';
+            $data = new BogusAction();
+            $data->action = $_POST['extAction'];
+            $data->method = $_POST['extMethod'];
+            $data->tid = isset($_POST['extTID']) ? $_POST['extTID'] : null; // not set for upload
+            $data->data = array($_POST, $_FILES);
+        } else {
+            die('Invalid request.');
+        }
+
+        $response = null;
+        if (is_array($data)) {
+            $response = array();
+            foreach ($data as $d) {
+                $response[] = $this->doRpc($d);
+            }
+        } else {
+            $response = $this->doRpc($data);
+        }
+        if ($isForm && $isUpload) {
+            echo '<html><body><textarea>';
+            echo json_encode($response);
+            echo '</textarea></body></html>';
+        } else {
+            echo json_encode($response);
+        }
+    }
+
+
+
+    function doRpc($cdata) {
+        $DirectAPI = new DirectAPI();
+        $API = $DirectAPI->api;
+        try {
+            if (!isset($API[$cdata->action])) {
+                throw new Exception('Call to undefined action: ' . $cdata->action);
+            }
+
+            $action = $cdata->action;
+            $a = $API[$action];
+
+            $this->doAroundCalls($a['before'], $cdata);
+
+            $method = $cdata->method;
+            $mdef = $a['methods'][$method];
+            if (!$mdef) {
+                throw new Exception("Call to undefined method: $method on action $action");
+            }
+            $this->doAroundCalls($mdef['before'], $cdata);
+
+            $r = array(
+                'type' => 'rpc',
+                'tid' => $cdata->tid,
+                'action' => $action,
+                'method' => $method
+            );
+
+            require_once("components/com_allocation/models/$action.php");
+            $o = new $action();
+            if (isset($mdef['len'])) {
+                $params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();
+            } else {
+                $params = array($cdata->data);
+            }
+
+            $r['result'] = call_user_func_array(array($o, $method), $params);
+
+            $this->doAroundCalls($mdef['after'], $cdata, $r);
+            $this->doAroundCalls($a['after'], $cdata, $r);
+        } catch (Exception $e) {
+            $r['type'] = 'exception';
+            $r['message'] = $e->getMessage();
+            $r['where'] = $e->getTraceAsString();
+        }
+        return $r;
+    }
+
+    function doAroundCalls(&$fns, &$cdata, &$returnData = null) {
+        if (!$fns) {
+            return;
+        }
+        if (is_array($fns)) {
+            foreach ($fns as $f) {
+                $f($cdata, $returnData);
+            }
+        } else {
+            $fns($cdata, $returnData);
+        }
+    }
+
+    /*
     function RMVehicle()
     {
         $databaseMgr = new DatabaseMgr();
@@ -19,15 +124,15 @@ class Controllerallocation extends JController {
         $status = JRequest::getVar('status');
         if($id)
         {
-            $databaseMgr->queryStatement($databaseMgr->getStatement('STMT_UPDATE_VEHICLE_STATUS'),array($id,$status));     
+            $databaseMgr->queryStatement($databaseMgr->getStatement('STMT_UPDATE_VEHICLE_STATUS'),array($id,$status));
             $succes['status'] = true;
             $succes['message'] = "Estado de Vehiculo modificado exitosamente";
         }
         else
         {
-            $databaseMgr->queryStatement($databaseMgr->getStatement('STMT_CREATE_VEHICLE'),array($plate,$model,$owner,$status));     
+            $databaseMgr->queryStatement($databaseMgr->getStatement('STMT_CREATE_VEHICLE'),array($plate,$model,$owner,$status));
             $succes['status'] = true;
-            $succes['message'] = "Vehiculo creado exitosamente"; 
+            $succes['message'] = "Vehiculo creado exitosamente";
         }
     }
     function RMClient()
@@ -66,7 +171,7 @@ class Controllerallocation extends JController {
         {
             $databaseMgr->queryStatement($databaseMgr->getStatement('STMT_INSERT_NEW_JOBCARD'),array($client_id,$date,$status));
             $succes['status'] = true;
-            $succes['message'] = "Jobcard creada exitosamente";  
+            $succes['message'] = "Jobcard creada exitosamente";
         }
 
     }
@@ -86,9 +191,9 @@ class Controllerallocation extends JController {
         {
             $databaseMgr->queryStatement($databaseMgr->getStatement('STMT_INSERT_NEW_EMPLOYEE'),array($phone,$address));
             $succes['status'] = true;
-            $succes['message'] = "Empleado creado exitosamente";  
+            $succes['message'] = "Empleado creado exitosamente";
         }
-        
+
     }
     function searchTecnics(){
         // HAY QUE VERIFICAR QUE NO TENGA LA CUENTA BLOQUEDA PARA QUE NO SEA UN TECNICO VIEJO
@@ -102,9 +207,9 @@ class Controllerallocation extends JController {
         $status = JRequest::getVar("status");
         $id = JRequest::getVar("vehicle_id");
     }
-  
-  
-  
+
+
+
   function allocationController(){
             $user	= new PortalUser();
             $action = JRequest::getString("action","");
@@ -127,6 +232,8 @@ class Controllerallocation extends JController {
                     $this->ModifyVehicleStatus();
                 }
             }
-      
+
   }
-} 
+     *
+     */
+}

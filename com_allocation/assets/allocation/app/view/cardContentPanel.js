@@ -47,6 +47,33 @@ function getBasicLayouts() {
             xtype: 'jobcardAssignmentPanel',
             id: 'jobcard_assignment-panel',
             layout: 'border'
+        },
+        vehicleMgr: {
+            id:'vehicleMgr-panel',
+            title: 'Gestiona los vehiculos',
+            layout: 'border',
+            bodyBorder: false,
+            defaults: {
+                collapsible: true,
+                split: true,
+                animFloat: false,
+                autoHide: false,
+                useSplitTips: true,
+                bodyStyle: 'padding:15px'
+            },
+            items: [{
+                frame: false,
+                id: 'vehicleMgr-main-content',
+                collapsible: false,
+                autoScroll: true,
+                region: 'center',
+                margins: '5 0 0 0',
+                items: {
+                    xtype: 'vehicleGridPanel',
+                    id: 'vehicleMgr-vehicleGridPanel',
+                    layout: 'border'
+                }
+            }]
         }
     };
 }

@@ -9,6 +9,8 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
+require_once ('components/com_allocation/models/Vehicle.php');
+
 class DatabaseMgr {
 
     public $DB_HOST;
@@ -28,7 +30,7 @@ class DatabaseMgr {
     }
 
     function getStatement($stmt) {
-        switch ($stmt) { 
+        switch ($stmt) {
             case 'STMT_GET_USERGROUPS':
                 return "SELECT group_id FROM #__user_usergroup_map WHERE user_id = ?";
             case 'STMT_UPDATE_CLIENT':
@@ -45,6 +47,12 @@ class DatabaseMgr {
                 return "UPDATE #__allocation_employee SET phone = ? , address = ? WHERE user_id = ? ";
             case 'STMT_INSERT_NEW_EMPLOYEE':
                 return "INSERT INTO #__allocation_employee (`phone`,`address`) VALUES (?,?)";
+
+            case 'STMT_GET_VEHICLES':
+                return "SELECT * from #__allocation_vehicle";
+
+            case 'STMT_GET_VEHICLE':
+                return "SELECT * from #__allocation_vehicle WHERE id = ?";
             default:
                 return;
         }

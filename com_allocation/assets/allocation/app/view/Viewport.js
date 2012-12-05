@@ -5,7 +5,8 @@ Ext.define('Allocation.view.Viewport', {
     requires: [
         'Allocation.view.cardContentPanel',
         'Allocation.view.menuTreePanel',
-        'Allocation.view.jobcardAssignmentPanel'
+        'Allocation.view.jobcardAssignmentPanel',
+        'Allocation.view.vehicleGridPanel'
     ],
 
     initComponent: function() {

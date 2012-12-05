@@ -3,9 +3,8 @@ defined('_JEXEC') or die('Restricted access');
 
 jimport('joomla.application.component.view');
 
-class ViewPrincipal extends JView {
+class allocationViewmain extends JView {
   function display($tpl=null) {
-
 
     parent::display();
   }

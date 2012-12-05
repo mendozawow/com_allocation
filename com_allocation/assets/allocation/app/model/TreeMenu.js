@@ -4,7 +4,7 @@
  */
 
 
-Ext.define('TreeMenu', {
+Ext.define('Allocation.model.TreeMenu', {
     extend: 'Ext.data.Model',
     fields: [
        {name: 'id'},
