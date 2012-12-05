@@ -1,9 +1,12 @@
 <?php
-require('directConfig.php' );
+require ('../models/directConfig.php');
 header('Content-Type: text/javascript');
 
 // convert API config to Ext.Direct spec
 $actions = array();
+$directApi = new DirectAPI();
+$API = $directApi->api;
+
 foreach($API as $aname=>&$a){
 	$methods = array();
 	foreach($a['methods'] as $mname=>&$m){

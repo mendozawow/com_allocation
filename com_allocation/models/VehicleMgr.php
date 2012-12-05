@@ -18,7 +18,7 @@ class VehicleMgr {
     }
 
     public function jGetVehicles($params) {
-        $qParams = $params->params;
+        $qParams = false;
         $vehicles = $this->getVehicles('STMT_GET_VEHICLES', $qParams);
         return $vehicles;
     }
